@@ -1,17 +1,39 @@
-﻿using TestRoverApp.Model;
+﻿using TestRoverApp.Interfaces;
+using TestRoverApp.Model;
 using TestRoverApp.Utils;
 
 namespace TestRoverApp.Services
 {
-    public class HoverService
+    public class HoverService: IHoverService
     {
         public Coordenate? PlateauUpperRight;
         public List<Hover> Hovers { get; set; } = new List<Hover>();
 
         public void GetFileInformation(string[] lines)
         {
+            if (lines.Length <= 0)
+                throw new ArgumentException("There is no lines to read.");
+
+            if (lines.Length == 1)
+                throw new ArgumentException("There is no hovers.");
+
+            if (lines.Length > 1 && lines.Length % 2 == 0)
+                throw new ArgumentException("Invalid input number of lines");
+
             var plateau = lines[0].Split(' ');
-            PlateauUpperRight = new Coordenate(Convert.ToInt32(plateau[0]), Convert.ToInt32(plateau[1]));
+
+            if (plateau.Length != 2)
+                throw new ArgumentException("Invalid plateau input");
+
+            int plateauX = 0;
+            if(!int.TryParse(plateau[0], out plateauX))
+                throw new ArgumentException("Invalid plateau X input");
+
+            int plateauY = 0;
+            if (!int.TryParse(plateau[1], out plateauY))
+                throw new ArgumentException("Invalid plateau Y input");
+
+            PlateauUpperRight = new Coordenate(plateauX, plateauY);
 
             for (int i = 1; i < lines.Length; i++)
             {
@@ -31,7 +53,7 @@ namespace TestRoverApp.Services
             }
         }
 
-        public void PrintOutput()
+        public string GetOutput()
         {
             string output = string.Empty;
 
@@ -41,34 +63,26 @@ namespace TestRoverApp.Services
                 output += $"{lastPosition.X} {lastPosition.Y} {lastPosition.Heading}\n";
             }
 
-            Console.WriteLine(output);
+            return output;
         }
 
-        public void PrintTracking()
-        {
-            string output = string.Empty;
-
-            foreach (var hover in Hovers)
-            {
-                foreach (var tracking in hover.Tracking)
-                {
-                    output += $"{tracking.X} {tracking.Y} {tracking.Heading}\n";
-                }
-                output += "\n";
-            }
-
-            Console.WriteLine(output);
-        }
-
-        private HoverPosition GetHoverInitialPosition(string line)
+        private Position GetHoverInitialPosition(string line)
         {
             var hoverPositionString = line.Split(' ');
+            if (hoverPositionString.Length != 3)
+                throw new ArgumentException("Invalid hover input");
+            
+            int hoverPositionX = 0;
+            if (!int.TryParse(hoverPositionString[0], out hoverPositionX))
+                throw new ArgumentException("Invalid hover X input");
 
-            var hoverPositionX = Convert.ToInt32(hoverPositionString[0]);
-            var hoverPositionY = Convert.ToInt32(hoverPositionString[1]);
+            int hoverPositionY = 0;
+            if (!int.TryParse(hoverPositionString[1], out hoverPositionY))
+                throw new ArgumentException("Invalid hover Y input");
+
             var hoverPositionHeading = hoverPositionString[2][0];
 
-            var hoverPosition = new HoverPosition(hoverPositionX, hoverPositionY, hoverPositionHeading);
+            var hoverPosition = new Position(hoverPositionX, hoverPositionY, hoverPositionHeading);
 
             return hoverPosition;
         }
@@ -77,7 +91,7 @@ namespace TestRoverApp.Services
         {
             var actualPosition = hover.Tracking.First();
             char auxHeading;
-            HoverPosition newPosition;
+            Position newPosition;
 
             foreach (var instruction in hover.Instructions)
             {
@@ -85,23 +99,23 @@ namespace TestRoverApp.Services
                 {
                     case 'L':
                         auxHeading = NavigationHelper.TurnLeft(actualPosition.Heading);
-                        newPosition = new HoverPosition(actualPosition.X, actualPosition.Y, auxHeading);
+                        newPosition = new Position(actualPosition.X, actualPosition.Y, auxHeading);
                         hover.Tracking.Add(newPosition);
                         actualPosition = newPosition;
                         break;
                     case 'R':
                         auxHeading = NavigationHelper.TurnRight(actualPosition.Heading);
-                        newPosition = new HoverPosition(actualPosition.X, actualPosition.Y, auxHeading);
+                        newPosition = new Position(actualPosition.X, actualPosition.Y, auxHeading);
                         hover.Tracking.Add(newPosition);
                         actualPosition = newPosition;
                         break;
                     case 'M':
-                        newPosition = NavigationHelper.Move(actualPosition);
+                        newPosition = NavigationHelper.Move(actualPosition, PlateauUpperRight);
                         hover.Tracking.Add(newPosition);
                         actualPosition = newPosition;
                         break;
                     default:
-                        break;
+                        throw new ArgumentException("Invalid instruction");
                 }
             }
         }

@@ -1,14 +1,23 @@
-﻿using TestRoverApp;
+﻿using TestRoverApp.Interfaces;
 using TestRoverApp.Services;
 
-var textFile = ".\\testRover.txt";
+try
+{
+    var textFile = ".\\testRover.txt";
 
-string[] lines = File.ReadAllLines(textFile);
+    string[] lines = File.ReadAllLines(textFile);
 
-var hoverService = new HoverService();
+    IHoverService hoverService = new HoverService();
 
-hoverService.GetFileInformation(lines);
+    hoverService.GetFileInformation(lines);
 
-hoverService.ExecuteInstructions();
+    hoverService.ExecuteInstructions();
 
-hoverService.PrintOutput();
+    Console.WriteLine(hoverService.GetOutput());
+}
+catch (Exception e)
+{
+    Console.WriteLine(e.Message);
+}
+
+Console.ReadLine();

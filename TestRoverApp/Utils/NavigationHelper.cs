@@ -27,18 +27,34 @@ namespace TestRoverApp.Utils
             return Compass[index];
         }
 
-        public static HoverPosition Move(HoverPosition position)
+        public static Position Move(Position position, Coordenate PlateauUpperRight)
         {
             switch (position.Heading)
             {
                 case 'N':
-                    return new HoverPosition(position.X, position.Y + 1, position.Heading);
+                    var newNY = position.Y + 1;
+                    if (newNY < 0 || newNY > PlateauUpperRight.Y)
+                        throw new Exception("Hover jumping off the plateau");
+
+                    return new Position(position.X, newNY, position.Heading);
                 case 'E':
-                    return new HoverPosition(position.X + 1, position.Y, position.Heading);
+                    var newEX = position.X + 1;
+                    if (newEX < 0 || newEX > PlateauUpperRight.X)
+                        throw new Exception("Hover jumping off the plateau");
+
+                    return new Position(newEX, position.Y, position.Heading);
                 case 'S':
-                    return new HoverPosition(position.X, position.Y - 1, position.Heading);
+                    var newSY = position.Y - 1;
+                    if (newSY < 0 || newSY > PlateauUpperRight.Y)
+                        throw new Exception("Hover jumping off the plateau");
+
+                    return new Position(position.X, newSY, position.Heading);
                 case 'W':
-                    return new HoverPosition(position.X - 1, position.Y, position.Heading);
+                    var newWX = position.X - 1;
+                    if (newWX < 0 || newWX > PlateauUpperRight.X)
+                        throw new Exception("Hover jumping off the plateau");
+
+                    return new Position(newWX, position.Y, position.Heading);
                 default:
                     return position;
             }

@@ -1,15 +1,19 @@
-﻿namespace TestRoverApp.Model
+﻿using System.Drawing;
+
+namespace TestRoverApp.Model
 {
     public class Hover
     {
-        public List<HoverPosition> Tracking { get; set; } = new List<HoverPosition>();
+        public List<Position> Tracking { get; set; } = new List<Position>();
 
         public string Instructions { get; set; }
 
-        public Hover(HoverPosition startPosition, string instruction)
+        public Hover(Position startPosition, string instruction)
         {
             Tracking.Add(startPosition);
             Instructions = instruction;
         }
+
+        public Hover(){} 
     }
 }

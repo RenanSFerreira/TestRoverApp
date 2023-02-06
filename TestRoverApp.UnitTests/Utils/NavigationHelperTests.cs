@@ -1,4 +1,5 @@
-﻿using TestRoverApp.Utils;
+﻿using TestRoverApp.Model;
+using TestRoverApp.Utils;
 
 namespace TestRoverApp.UnitTests.Utils
 {
@@ -25,13 +26,17 @@ namespace TestRoverApp.UnitTests.Utils
         }
 
         [Theory]
-        [InlineData('N', 'W')]
-        [InlineData('W', 'S')]
-        [InlineData('S', 'E')]
-        [InlineData('E', 'N')]
-        public void MoveReturnTheExpectedHoverPosition(char input, char expectedOutput)
+        [InlineData(1, 2, 'N', 1, 3)]
+        [InlineData(1, 2, 'E', 2, 2)]
+        [InlineData(1, 2, 'S', 1, 1)]
+        [InlineData(1, 2, 'W', 0, 2)]
+        public void MoveReturnTheExpectedHoverPosition(int x, int y, char heading, int x2, int y2)
         {
-            Assert.Equal(expectedOutput, NavigationHelper.TurnLeft(input));
+            Coordenate c = new Coordenate(5, 5);
+            Position initialPosition = new Position(x, y, heading);
+            Position expectedPosition = new Position(x2, y2, heading);
+
+            Assert.Equivalent(expectedPosition, NavigationHelper.Move(initialPosition, c));
         }
     }
 }
